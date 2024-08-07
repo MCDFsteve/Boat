@@ -1,3 +1,4 @@
+//障碍物-岩石
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

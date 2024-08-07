@@ -1,3 +1,4 @@
+//碰撞箱
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

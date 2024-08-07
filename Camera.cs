@@ -1,3 +1,4 @@
+//摄像机
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

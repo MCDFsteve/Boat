@@ -1,3 +1,4 @@
+//贴图绘制
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

@@ -1,3 +1,4 @@
+//地形生成
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ namespace Boat
 
                     foreach (var pos in positions)
                     {
-                        if (Vector2.Distance(position, pos) < obstacleSize.Length() / 2)
+                        if (Vector2.Distance(position, pos) < obstacleSize.Length() / 4)
                         {
                             overlapping = true;
                             break;

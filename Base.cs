@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿//主逻辑
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 namespace Boat
 {
     // Base 类继承自 Game 类并实现 IDisposable 接口
@@ -65,7 +65,7 @@ namespace Boat
             _dynamicBackground = new DynamicBackground(backgroundTexture, GraphicsDevice.Viewport);
 
             // 使用预设参数生成障碍物位置
-            int obstacleCount = ObstacleGenerator.GenerateCountFromHash("114514", 10); // 使用预设参数生成障碍物数量
+            int obstacleCount = ObstacleGenerator.GenerateCountFromHash("114514", 50); // 使用预设参数生成障碍物数量
             List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(114514, obstacleCount, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
             // 初始化障碍物列表
