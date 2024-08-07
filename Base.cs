@@ -1,10 +1,10 @@
-﻿//主逻辑
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 namespace Boat
 {
     // Base 类继承自 Game 类并实现 IDisposable 接口
@@ -20,6 +20,10 @@ namespace Boat
         private List<Obstacle> _obstacles; // 障碍物列表
         private int _previousWindowHeight;
 
+        // 输入相关字段
+        private InputHandler _inputHandler;
+        private SpriteFont _inputFont;
+
         // 构造函数，初始化图形设备管理器并设置内容目录
         public Base()
         {
@@ -34,26 +38,21 @@ namespace Boat
         // 初始化方法，重写 Game 类的 Initialize 方法
         protected override void Initialize()
         {
-            // TODO: 在这里添加初始化逻辑
-
             base.Initialize();
             _previousWindowHeight = GraphicsDevice.Viewport.Height;
-            CoordinateSystem.Initialize(new Vector2(164, 164)); // 设置原点偏移量
+            _inputHandler = new InputHandler();
         }
 
         // 加载内容方法，重写 Game 类的 LoadContent 方法
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            // TODO: 使用 this.Content 在这里加载你的游戏内容
-            // 加载玩家纹理
+            // 加载游戏内容
             Texture2D playerTexture = Content.Load<Texture2D>("player");
-            // 加载背景纹理
             Texture2D backgroundTexture = Content.Load<Texture2D>("background");
-            // 加载障碍物纹理
             Texture2D obstacleTexture = Content.Load<Texture2D>("obstacle");
-            // 加载调试字体
             SpriteFont gameFont = Content.Load<SpriteFont>("GameFont");
+            _inputFont = Content.Load<SpriteFont>("GameFont");
 
             // 初始化玩家实例
             _player = new Player(playerTexture, GraphicsDevice);
@@ -64,31 +63,14 @@ namespace Boat
             // 初始化动态背景实例
             _dynamicBackground = new DynamicBackground(backgroundTexture, GraphicsDevice.Viewport);
 
-            // 使用预设参数生成障碍物位置
-            int obstacleCount = ObstacleGenerator.GenerateCountFromHash("114514", 50); // 使用预设参数生成障碍物数量
-            List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(114514, obstacleCount, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-
-            // 初始化障碍物列表
-            _obstacles = obstaclePositions.Select(pos => new Obstacle(obstacleTexture, pos, GraphicsDevice)).ToList();
-
             // 初始化调试覆盖实例
             _debugOverlay = new DebugOverlay(gameFont);
 
             // 更新缩放比例
             TextureManager.UpdateScale(GraphicsDevice.Viewport.Height);
-        }
 
-        public static Color FromHex(string hex)
-        {
-            // 去掉 # 符号
-            hex = hex.Replace("#", string.Empty);
-
-            // 解析 R、G、B 分量
-            byte r = Convert.ToByte(hex.Substring(0, 2), 16);
-            byte g = Convert.ToByte(hex.Substring(2, 2), 16);
-            byte b = Convert.ToByte(hex.Substring(4, 2), 16);
-
-            return new Color(r, g, b);
+            // 初始化障碍物列表为空，防止 Update 方法中空引用
+            _obstacles = new List<Obstacle>();
         }
 
         // 更新方法，重写 Game 类的 Update 方法
@@ -97,49 +79,90 @@ namespace Boat
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // 检测窗口高度变化
-            int currentWindowHeight = GraphicsDevice.Viewport.Height;
-            if (currentWindowHeight != _previousWindowHeight)
+            if (_inputHandler.IsInputActive)
             {
-                TextureManager.UpdateScale(currentWindowHeight);
-                _camera.UpdateViewport(GraphicsDevice.Viewport);
-                _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
-                _previousWindowHeight = currentWindowHeight;
+                if (_inputHandler.HandleInput())
+                {
+                    StartGame(_inputHandler.InputText);
+                }
+            }
+            else
+            {
+                // 检测窗口高度变化
+                int currentWindowHeight = GraphicsDevice.Viewport.Height;
+                if (currentWindowHeight != _previousWindowHeight)
+                {
+                    TextureManager.UpdateScale(currentWindowHeight);
+                    _camera.UpdateViewport(GraphicsDevice.Viewport);
+                    _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
+                    _previousWindowHeight = currentWindowHeight;
+                }
+
+                // 确保_player 和 _obstacles 已初始化
+                if (_player != null && _obstacles != null)
+                {
+                    _player.Update(gameTime, _obstacles.Select(o => o.CollisionBox).ToArray());
+                    _camera.Follow(_player.Position, new Vector2(_player.Texture.Width, _player.Texture.Height) * TextureManager.Scale);
+                    _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
+                }
             }
 
-            _player.Update(gameTime, _obstacles.Select(o => o.CollisionBox).ToArray());
-            _camera.Follow(_player.Position, new Vector2(_player.Texture.Width, _player.Texture.Height) * TextureManager.Scale);
-
-            _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
-
             base.Update(gameTime);
+        }
+
+        private void StartGame(string seedText)
+        {
+            // 使用玩家输入的种子值生成障碍物
+            int seed = seedText.GetHashCode();
+            Texture2D obstacleTexture = Content.Load<Texture2D>("obstacle");
+            List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(seed, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+            // 初始化障碍物列表
+            _obstacles = obstaclePositions.Select(pos => new Obstacle(obstacleTexture, pos, GraphicsDevice)).ToList();
         }
 
         // 绘制方法，重写 Game 类的 Draw 方法
         protected override void Draw(GameTime gameTime)
         {
-            // 清除屏幕并设置背景色为 CornflowerBlue
-            // 使用 FromHex 方法创建自定义颜色
-            Color customColor = FromHex("#ffffff"); // 这是 CornflowerBlue 的十六进制表示
+            // 清除屏幕并设置背景色
+            Color customColor = ColorHelper.FromHex("#ffffff");
             GraphicsDevice.Clear(customColor);
 
             _spriteBatch.Begin(transformMatrix: _camera.Transform, samplerState: SamplerState.PointClamp);
-            _dynamicBackground.Draw(_spriteBatch); // 绘制动态背景
-
-            // 绘制障碍物
-            foreach (var obstacle in _obstacles)
+            if (!_inputHandler.IsInputActive)
             {
-                obstacle.Draw(_spriteBatch);
+                _dynamicBackground?.Draw(_spriteBatch); // 绘制动态背景
+
+                // 绘制障碍物
+                if (_obstacles != null)
+                {
+                    foreach (var obstacle in _obstacles)
+                    {
+                        obstacle.Draw(_spriteBatch);
+                    }
+                }
+
+                _player?.Draw(_spriteBatch); // 绘制玩家
             }
-
-            _player.Draw(_spriteBatch); // 绘制玩家
             _spriteBatch.End();
 
-            // 绘制调试信息
-            _spriteBatch.Begin();
-            Vector2 playerPosition = CoordinateSystem.GetPlayerPosition(_player.Position + new Vector2(_player.Texture.Width, _player.Texture.Height) * TextureManager.Scale / 2);
-            _debugOverlay.Draw(_spriteBatch, _dynamicBackground.TileCount, playerPosition);
-            _spriteBatch.End();
+            if (_inputHandler.IsInputActive)
+            {
+                _spriteBatch.Begin();
+                _spriteBatch.DrawString(_inputFont, "Enter Seed: " + _inputHandler.InputText, new Vector2(100, 100), Color.Black);
+                _spriteBatch.End();
+            }
+            else
+            {
+                // 绘制调试信息
+                _spriteBatch.Begin();
+                if (_player != null)
+                {
+                    Vector2 playerPosition = CoordinateSystem.GetPlayerPosition(_player.Position + new Vector2(_player.Texture.Width, _player.Texture.Height) * TextureManager.Scale / 2);
+                    _debugOverlay?.Draw(_spriteBatch, _dynamicBackground.TileCount, playerPosition);
+                }
+                _spriteBatch.End();
+            }
 
             base.Draw(gameTime);
         }
@@ -155,8 +178,6 @@ namespace Boat
                     _spriteBatch?.Dispose();
                     _graphics?.Dispose();
                 }
-
-                // 释放非托管资源（如果有）
 
                 _disposed = true;
             }

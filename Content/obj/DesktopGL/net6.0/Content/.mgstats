@@ -1,5 +1,5 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"/Library/Afolder/MonoGameProject/Boat/Content/background.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/background.xnb","TextureProcessor","Texture2DContent",3411,4181,0.187006
+"/Library/Afolder/MonoGameProject/Boat/Content/background.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/background.xnb","TextureProcessor","Texture2DContent",3491,4181,0.185031
 "/Library/Afolder/MonoGameProject/Boat/Content/GameFont.spritefont","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/GameFont.xnb","FontDescriptionProcessor","SpriteFontContent",473,37919,0.302924
-"/Library/Afolder/MonoGameProject/Boat/Content/obstacle.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/obstacle.xnb","TextureProcessor","Texture2DContent",3825,4181,0.182042
-"/Library/Afolder/MonoGameProject/Boat/Content/player.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/player.xnb","TextureProcessor","Texture2DContent",5080,16469,0.007439
+"/Library/Afolder/MonoGameProject/Boat/Content/obstacle.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/obstacle.xnb","TextureProcessor","Texture2DContent",3825,4181,0.232346
+"/Library/Afolder/MonoGameProject/Boat/Content/player.png","/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/player.xnb","TextureProcessor","Texture2DContent",5080,16469,0.197188

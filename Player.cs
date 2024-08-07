@@ -10,8 +10,8 @@ namespace Boat
         public Texture2D Texture { get; private set; }
         public CollisionBox CollisionBox { get; private set; }
         private float _speed; // 角色移动速度
-        private float Pwidth = 1.15f;
-        private float Pheight = 0.5f;
+        private float Pwidth = 4.27f;
+        private float Pheight = 30f;
 
         // 设置纹理宽度和高度为变量
         private int _textureWidth;
@@ -24,8 +24,8 @@ namespace Boat
             _speed = 2 * texture.Width;
 
             // 初始化纹理宽度和高度
-            _textureWidth = Texture.Width*14/30;
-            _textureHeight = Texture.Height*4/5;
+            _textureWidth = Texture.Width*1/5;
+            _textureHeight = Texture.Height*1/14;
 
             CollisionBox = new CollisionBox(graphicsDevice, Position, new Vector2(_textureWidth, _textureHeight), Pwidth, Pheight);
         }

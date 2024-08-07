@@ -8,6 +8,7 @@ namespace Boat
     {
         private Rectangle _box;
         private Texture2D _borderTexture;
+        private bool _showBorder; // 新增布尔变量
 
         public CollisionBox(GraphicsDevice graphicsDevice, Vector2 position, Vector2 size, float relativeX, float relativeY)
         {
@@ -21,6 +22,8 @@ namespace Boat
             // 创建一个1x1像素的纹理，并设置为黄色
             _borderTexture = new Texture2D(graphicsDevice, 1, 1);
             _borderTexture.SetData(new[] { Color.Yellow });
+
+            _showBorder = false; // 默认不显示描边
         }
 
         public Rectangle Box => _box;
@@ -38,11 +41,20 @@ namespace Boat
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            // 绘制碰撞箱的黄色描边
-            spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Top, _box.Width, 1), Color.Yellow); // Top
-            spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Bottom, _box.Width, 1), Color.Yellow); // Bottom
-            spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Top, 1, _box.Height), Color.Yellow); // Left
-            spriteBatch.Draw(_borderTexture, new Rectangle(_box.Right, _box.Top, 1, _box.Height), Color.Yellow); // Right
+            if (_showBorder)
+            {
+                // 绘制碰撞箱的黄色描边
+                spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Top, _box.Width, 1), Color.Yellow); // Top
+                spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Bottom, _box.Width, 1), Color.Yellow); // Bottom
+                spriteBatch.Draw(_borderTexture, new Rectangle(_box.Left, _box.Top, 1, _box.Height), Color.Yellow); // Left
+                spriteBatch.Draw(_borderTexture, new Rectangle(_box.Right, _box.Top, 1, _box.Height), Color.Yellow); // Right
+            }
+        }
+
+        // 新增方法来设置是否显示描边
+        public void SetShowBorder(bool show)
+        {
+            _showBorder = show;
         }
     }
 }
