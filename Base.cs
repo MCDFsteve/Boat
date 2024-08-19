@@ -4,7 +4,8 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Security.Cryptography; // 用于使用 SHA256
+using System.Text; // 用于使用 Encoding
 namespace Boat
 {
     // Base 类继承自 Game 类并实现 IDisposable 接口
@@ -112,13 +113,20 @@ namespace Boat
 
         private void StartGame(string seedText)
         {
-            // 使用玩家输入的种子值生成障碍物
-            int seed = seedText.GetHashCode();
-            Texture2D obstacleTexture = Content.Load<Texture2D>("obstacle");
-            List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(seed, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            // 使用 SHA256 生成稳定的种子值
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(seedText));
+                int seed = BitConverter.ToInt32(hashBytes, 0); // 提取前4字节作为种子值
+                                                               // 打印 seed 值用于调试
+                Console.WriteLine($"Generated Seed: {seed}");
 
-            // 初始化障碍物列表
-            _obstacles = obstaclePositions.Select(pos => new Obstacle(obstacleTexture, pos, GraphicsDevice)).ToList();
+                Texture2D obstacleTexture = Content.Load<Texture2D>("obstacle");
+                List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(seed, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+                // 初始化障碍物列表
+                _obstacles = obstaclePositions.Select(pos => new Obstacle(obstacleTexture, pos, GraphicsDevice)).ToList();
+            }
         }
 
         // 绘制方法，重写 Game 类的 Draw 方法

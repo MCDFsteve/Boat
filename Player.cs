@@ -21,7 +21,7 @@ namespace Boat
         {
             Texture = texture;
             Position = new Vector2(100, 100);
-            _speed = 2 * texture.Width;
+            _speed = 3 * texture.Width;
 
             // 初始化纹理宽度和高度
             _textureWidth = Texture.Width*1/5;

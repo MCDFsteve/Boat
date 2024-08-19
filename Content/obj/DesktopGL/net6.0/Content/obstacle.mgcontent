@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <SourceFile>/Library/Afolder/MonoGameProject/Boat/Content/obstacle.png</SourceFile>
-  <SourceTime>2024-08-07T16:57:19.4466514+08:00</SourceTime>
+  <SourceTime>2024-08-19T22:08:30.9678137+08:00</SourceTime>
   <DestFile>/Library/Afolder/MonoGameProject/Boat/Content/bin/DesktopGL/Content/obstacle.xnb</DestFile>
-  <DestTime>2024-08-07T16:57:45.0306336+08:00</DestTime>
+  <DestTime>2024-08-19T22:12:47.2388098+08:00</DestTime>
   <Importer>TextureImporter</Importer>
   <ImporterTime>2022-07-26T19:44:56+08:00</ImporterTime>
   <Processor>TextureProcessor</Processor>
