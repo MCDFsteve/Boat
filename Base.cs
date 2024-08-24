@@ -16,6 +16,7 @@ namespace Boat
         private bool _disposed = false;          // 标记是否已释放资源
         private Player _player; // 玩家实例
         private Camera _camera; // 摄影机实例
+        private RenderTarget2D _renderTarget;
         private DynamicBackground _dynamicBackground; // 动态背景实例
         private DebugOverlay _debugOverlay; // 调试覆盖实例
         private List<Obstacle> _obstacles; // 障碍物列表
@@ -31,19 +32,22 @@ namespace Boat
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            // 设置初始窗口大小
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
         }
 
         // 初始化方法，重写 Game 类的 Initialize 方法
         protected override void Initialize()
         {
             base.Initialize();
-            _previousWindowHeight = GraphicsDevice.Viewport.Height;
+            _previousWindowHeight = 720;
+            // 设置窗口的外部大小
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.ApplyChanges();
+
+            // 创建一个RenderTarget，大小为1280x720
+            _renderTarget = new RenderTarget2D(GraphicsDevice, 1280, 720);
             _inputHandler = new InputHandler();
         }
-
         // 加载内容方法，重写 Game 类的 LoadContent 方法
         protected override void LoadContent()
         {
@@ -59,16 +63,16 @@ namespace Boat
             _player = new Player(playerTexture, GraphicsDevice);
 
             // 初始化摄影机实例
-            _camera = new Camera(GraphicsDevice.Viewport);
+            _camera = new Camera();
 
             // 初始化动态背景实例
-            _dynamicBackground = new DynamicBackground(backgroundTexture, GraphicsDevice.Viewport);
+            _dynamicBackground = new DynamicBackground(backgroundTexture);
 
             // 初始化调试覆盖实例
             _debugOverlay = new DebugOverlay(gameFont);
 
             // 更新缩放比例
-            TextureManager.UpdateScale(GraphicsDevice.Viewport.Height);
+            TextureManager.UpdateScale(720);
 
             // 初始化障碍物列表为空，防止 Update 方法中空引用
             _obstacles = new List<Obstacle>();
@@ -90,12 +94,12 @@ namespace Boat
             else
             {
                 // 检测窗口高度变化
-                int currentWindowHeight = GraphicsDevice.Viewport.Height;
+                int currentWindowHeight = 720;
                 if (currentWindowHeight != _previousWindowHeight)
                 {
                     TextureManager.UpdateScale(currentWindowHeight);
-                    _camera.UpdateViewport(GraphicsDevice.Viewport);
-                    _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
+                    _camera.UpdateViewport();
+                    _dynamicBackground.Update( _player.Position);
                     _previousWindowHeight = currentWindowHeight;
                 }
 
@@ -104,7 +108,7 @@ namespace Boat
                 {
                     _player.Update(gameTime, _obstacles.Select(o => o.CollisionBox).ToArray());
                     _camera.Follow(_player.Position, new Vector2(_player.Texture.Width, _player.Texture.Height) * TextureManager.Scale);
-                    _dynamicBackground.Update(GraphicsDevice.Viewport, _player.Position);
+                    _dynamicBackground.Update( _player.Position);
                 }
             }
 
@@ -118,25 +122,24 @@ namespace Boat
             {
                 byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(seedText));
                 int seed = BitConverter.ToInt32(hashBytes, 0); // 提取前4字节作为种子值
-                                                               // 打印 seed 值用于调试
+                int windowHeight = 720;          // 打印 seed 值用于调试
                 Console.WriteLine($"Generated Seed: {seed}");
 
                 Texture2D obstacleTexture = Content.Load<Texture2D>("obstacle");
-                List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(seed, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+                List<Vector2> obstaclePositions = ObstacleGenerator.GenerateObstacles(seed, _player.Position, new Vector2(obstacleTexture.Width, obstacleTexture.Height), new Vector2(1280, 720), windowHeight);
 
                 // 初始化障碍物列表
                 _obstacles = obstaclePositions.Select(pos => new Obstacle(obstacleTexture, pos, GraphicsDevice)).ToList();
             }
         }
-
-        // 绘制方法，重写 Game 类的 Draw 方法
         protected override void Draw(GameTime gameTime)
         {
-            // 清除屏幕并设置背景色
-            Color customColor = ColorHelper.FromHex("#ffffff");
-            GraphicsDevice.Clear(customColor);
+            // 设置渲染目标为RenderTarget2D
+            GraphicsDevice.SetRenderTarget(_renderTarget);
+            GraphicsDevice.Clear(ColorHelper.FromHex("#ffffff"));
 
             _spriteBatch.Begin(transformMatrix: _camera.Transform, samplerState: SamplerState.PointClamp);
+
             if (!_inputHandler.IsInputActive)
             {
                 _dynamicBackground?.Draw(_spriteBatch); // 绘制动态背景
@@ -152,6 +155,7 @@ namespace Boat
 
                 _player?.Draw(_spriteBatch); // 绘制玩家
             }
+
             _spriteBatch.End();
 
             if (_inputHandler.IsInputActive)
@@ -172,9 +176,18 @@ namespace Boat
                 _spriteBatch.End();
             }
 
+            // 恢复默认渲染目标（即窗口）
+            GraphicsDevice.SetRenderTarget(null);
+            GraphicsDevice.Clear(Color.Black);
+
+            // 绘制RenderTarget到窗口，并缩放以适应窗口大小
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            var viewport = GraphicsDevice.Viewport;
+            _spriteBatch.Draw(_renderTarget, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.White);
+            _spriteBatch.End();
+
             base.Draw(gameTime);
         }
-
         // 释放资源的方法，重写 Game 类的 Dispose 方法
         protected override void Dispose(bool disposing)
         {

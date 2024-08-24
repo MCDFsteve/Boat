@@ -3,95 +3,92 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-
+using System.Linq;
 namespace Boat
 {
     public static class ObstacleGenerator
     {
-        public static List<Vector2> GenerateObstaclesForClosedLoop(int seed, int obstacleCount, float radius, float irregularity)
+        public static List<Vector2> GenerateObstaclesForClosedLoop(int seed, int obstacleCount, float radius, float obstacleSize, int windowHeight)
         {
             List<Vector2> positions = new List<Vector2>();
-
-            Console.WriteLine($"Seed: {seed}");
             Random random = new Random(seed);
 
-            // Step 1: 计算关键点
-            List<Vector2> keyPoints = new List<Vector2>();
-            float minDistance = radius / (obstacleCount * 0.5f);  // 设置最小距离约束
+            int gridSize = 64; // 设定网格大小为64像素
+
+            // 使用动态计算的 gridSize 生成初始种子点
+            positions = GenerateInitialSeedPoints(seed, obstacleCount, radius, obstacleSize, gridSize);
+
+            // 填充相邻点之间的连接，确保形成封闭环路
+            List<Vector2> filledPositions = FillConnectionsBetweenPoints(positions, gridSize, random);
+
+            return filledPositions;
+        }
+
+        // 修改 GenerateInitialSeedPoints 方法的签名，以接收 gridSize
+        private static List<Vector2> GenerateInitialSeedPoints(int seed, int obstacleCount, float radius, float obstacleSize, int gridSize)
+        {
+            List<Vector2> seedPoints = new List<Vector2>();
+            Random random = new Random(seed);
+
+            // 这里使用 gridSize 进行位置计算
             for (int i = 0; i < obstacleCount; i++)
             {
-                float angle = i * (2 * MathF.PI / obstacleCount);
-                float noise = (float)(random.NextDouble() * 2 - 1) * irregularity;
-
-                float r = radius + noise * radius;
-                float x = r * MathF.Cos(angle);
-                float y = r * MathF.Sin(angle);
-
-                if (keyPoints.Count > 0)
-                {
-                    Vector2 lastPoint = keyPoints[keyPoints.Count - 1];
-                    if (Math.Abs(x - lastPoint.X) < minDistance)
-                    {
-                        x = lastPoint.X;  // 如果x距离太短，使用相同的x值
-                    }
-                    if (Math.Abs(y - lastPoint.Y) < minDistance)
-                    {
-                        y = lastPoint.Y;  // 如果y距离太短，使用相同的y值
-                    }
-                }
-
-                // 对齐到整数格子
-                x = MathF.Round(x);
-                y = MathF.Round(y);
-
-                keyPoints.Add(new Vector2(x, y));
+                float angle = MathHelper.ToRadians((360f / obstacleCount) * i);
+                float x = radius * (float)Math.Cos(angle) + random.Next(-gridSize, gridSize);
+                float y = radius * (float)Math.Sin(angle) + random.Next(-gridSize, gridSize);
+                seedPoints.Add(new Vector2(x, y));
             }
 
-            // Step 2: 连接关键点，形成横竖交错的路径
-            float maxAllowedDistance = radius / (obstacleCount * 0.5f); // 调整阈值
-            for (int i = 0; i < keyPoints.Count; i++)
+            return seedPoints;
+        }
+
+        // 对相邻点之间进行填充，并形成封闭环路
+        private static List<Vector2> FillConnectionsBetweenPoints(List<Vector2> positions, float obstacleSize, Random random)
+        {
+            List<Vector2> filledPositions = new List<Vector2>();
+            int gridSize = 64; // 设定网格大小为64像素
+
+            for (int i = 0; i < positions.Count; i++)
             {
-                Vector2 startPoint = keyPoints[i];
-                Vector2 endPoint = keyPoints[(i + 1) % keyPoints.Count];  // 确保最后一个点与第一个点相连
+                Vector2 startPoint = positions[i];
+                Vector2 endPoint = positions[(i + 1) % positions.Count];
+
+                // 计算水平和垂直方向上的差异
+                float deltaX = endPoint.X - startPoint.X;
+                float deltaY = endPoint.Y - startPoint.Y;
 
                 // 水平移动
-                if (startPoint.X != endPoint.X)
+                int stepsX = (int)(Math.Abs(deltaX) / gridSize);
+                int directionX = deltaX > 0 ? 1 : -1;
+                for (int j = 0; j < stepsX; j++)
                 {
-                    float xDistance = Math.Abs(startPoint.X - endPoint.X);
-                    int xSegments = (int)(xDistance / maxAllowedDistance);
-                    for (int s = 1; s <= xSegments; s++)
-                    {
-                        float x = startPoint.X + s * (endPoint.X - startPoint.X) / (xSegments + 1);
-                        x = MathF.Round(x);  // 对齐到整数格子
-                        positions.Add(new Vector2(x, startPoint.Y));
-                    }
-                }
+                    Vector2 currentPosition = new Vector2(
+                        startPoint.X + directionX * j * gridSize,
+                        startPoint.Y
+                    );
+                    currentPosition.X = (float)Math.Round(currentPosition.X / gridSize) * gridSize;
+                    currentPosition.Y = (float)Math.Round(currentPosition.Y / gridSize) * gridSize;
 
-                // 检测转角并添加转角填充物
-                if (startPoint.X != endPoint.X && startPoint.Y != endPoint.Y)
-                {
-                    // 添加转角处的填充物
-                    positions.Add(new Vector2(endPoint.X, startPoint.Y));
+                    filledPositions.Add(currentPosition);
                 }
 
                 // 垂直移动
-                if (startPoint.Y != endPoint.Y)
+                int stepsY = (int)(Math.Abs(deltaY) / gridSize);
+                int directionY = deltaY > 0 ? 1 : -1;
+                for (int j = 0; j <= stepsY; j++)
                 {
-                    float yDistance = Math.Abs(startPoint.Y - endPoint.Y);
-                    int ySegments = (int)(yDistance / maxAllowedDistance);
-                    for (int s = 1; s <= ySegments; s++)
-                    {
-                        float y = startPoint.Y + s * (endPoint.Y - startPoint.Y) / (ySegments + 1);
-                        y = MathF.Round(y);  // 对齐到整数格子
-                        positions.Add(new Vector2(endPoint.X, y));
-                    }
-                }
+                    Vector2 currentPosition = new Vector2(
+                        startPoint.X + directionX * stepsX * gridSize,
+                        startPoint.Y + directionY * j * gridSize
+                    );
+                    currentPosition.X = (float)Math.Round(currentPosition.X / gridSize) * gridSize;
+                    currentPosition.Y = (float)Math.Round(currentPosition.Y / gridSize) * gridSize;
 
-                // 添加终点
-                positions.Add(endPoint);
+                    filledPositions.Add(currentPosition);
+                }
             }
 
-            return positions;
+            return filledPositions;
         }
 
         public static int GenerateCountFromHash(string hashInput, int maxCount)
@@ -103,13 +100,13 @@ namespace Boat
             }
         }
 
-        public static List<Vector2> GenerateObstacles(int seed, Vector2 playerPosition, Vector2 obstacleSize, Vector2 areaSize)
+        public static List<Vector2> GenerateObstacles(int seed, Vector2 playerPosition, Vector2 obstacleSize, Vector2 areaSize,int windowHeight)
         {
             int obstacleCount = GenerateCountFromHash(seed.ToString(), 100); // 仍然可以根据种子生成障碍物数量
             float radius = areaSize.X / 3; // 调整这个值以设置洞穴的平均半径
             float irregularity = 0.3f; // 调整这个值以增加或减少不规则性
 
-            return GenerateObstaclesForClosedLoop(seed, obstacleCount, radius, irregularity);
+            return GenerateObstaclesForClosedLoop(seed, obstacleCount, radius, irregularity, windowHeight);
         }
 
         private static float GetFloatFromHash(byte[] hash, int index)

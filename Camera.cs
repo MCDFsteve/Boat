@@ -10,9 +10,8 @@ namespace Boat
         private Vector2 _position;
         private Viewport _viewport;
 
-        public Camera(Viewport viewport)
+        public Camera()
         {
-            _viewport = viewport;
             _transform = Matrix.Identity;
             _position = Vector2.Zero;
         }
@@ -23,15 +22,14 @@ namespace Boat
         {
             _position = targetPosition + playerSize / 2;
 
-            var positionX = _position.X - _viewport.Width / 2;
-            var positionY = _position.Y - _viewport.Height / 2;
+            var positionX = _position.X - 1280 / 2;
+            var positionY = _position.Y - 720 / 2;
 
             _transform = Matrix.CreateTranslation(new Vector3(-positionX, -positionY, 0));
         }
 
-        public void UpdateViewport(Viewport newViewport)
+        public void UpdateViewport()
         {
-            _viewport = newViewport;
         }
     }
 }

@@ -15,24 +15,22 @@ namespace Boat
         private int _viewWidth;
         private int _viewHeight;
 
-        public DynamicBackground(Texture2D texture, Viewport viewport)
+        public DynamicBackground(Texture2D texture)
         {
             _texture = texture;
-            _viewport = viewport;
             _textureWidth = (int)(_texture.Width * TextureManager.Scale);
             _textureHeight = (int)(_texture.Height * TextureManager.Scale);
-            _viewWidth = viewport.Width + _textureWidth * 2;
-            _viewHeight = viewport.Height + _textureHeight * 2;
+            _viewWidth = 1280 + _textureWidth * 2;
+            _viewHeight = 720 + _textureHeight * 2;
             _visibleTiles = new HashSet<Point>();
         }
 
-        public void Update(Viewport viewport, Vector2 playerPosition)
+        public void Update(Vector2 playerPosition)
         {
-            _viewport = viewport;
             _textureWidth = (int)(_texture.Width * TextureManager.Scale);
             _textureHeight = (int)(_texture.Height * TextureManager.Scale);
-            _viewWidth = viewport.Width + _textureWidth * 2;
-            _viewHeight = viewport.Height + _textureHeight * 2;
+            _viewWidth = 1280 + _textureWidth * 2;
+            _viewHeight = 720 + _textureHeight * 2;
             UpdateVisibleTiles(playerPosition);
         }
 
