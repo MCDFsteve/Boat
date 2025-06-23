@@ -1,0 +1,12 @@
+res://scenes/Room01.tscn
+res://scripts/Room01.gd
+res://scripts/GlobalConfig.gd
+res://scenes/Main.tscn
+res://scripts/CameraController.gd
+res://scripts/Player.gd
+res://scenes/Player.tscn
+res://scripts/Player3DRenderer.gd
+res://scenes/Door.tscn
+res://scripts/Door.gd
+res://scripts/RoomManager.gd
+res://scripts/RoomTransition.gd

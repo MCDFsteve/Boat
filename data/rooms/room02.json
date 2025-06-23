@@ -1,0 +1,87 @@
+{
+  "id": "room02",
+  "name": "第二房间",
+  "background_image": "res://assets/background/room01.png",
+  "collision_mask": "res://assets/background/room01_block.png",
+  "type": "normal",
+  "presets": [
+    {
+      "name": "preset1",
+      "enemies": [
+        {
+          "type": "boss_spider",
+          "health": 100,
+          "position": [0.5, 0.5]
+        }
+      ],
+      "items": [
+        {
+          "type": "heart",
+          "position": [0.3, 0.3]
+        },
+        {
+          "type": "heart",
+          "position": [0.7, 0.7]
+        }
+      ]
+    },
+    {
+      "name": "preset2",
+      "enemies": [
+        {
+          "type": "enemy_fly",
+          "health": 20,
+          "position": [0.2, 0.3]
+        },
+        {
+          "type": "enemy_fly",
+          "health": 20,
+          "position": [0.8, 0.3]
+        },
+        {
+          "type": "enemy_spider",
+          "health": 30,
+          "position": [0.5, 0.7]
+        }
+      ],
+      "items": [
+        {
+          "type": "key",
+          "position": [0.5, 0.2]
+        }
+      ]
+    },
+    {
+      "name": "preset3",
+      "enemies": [
+        {
+          "type": "enemy_spider",
+          "health": 30,
+          "position": [0.3, 0.4]
+        },
+        {
+          "type": "enemy_spider",
+          "health": 30,
+          "position": [0.7, 0.4]
+        },
+        {
+          "type": "enemy_spider",
+          "health": 30,
+          "position": [0.5, 0.6]
+        }
+      ],
+      "items": [
+        {
+          "type": "heart",
+          "position": [0.5, 0.3]
+        }
+      ]
+    }
+  ],
+  "exits": {
+    "north": null,
+    "south": null,
+    "east": "room03",
+    "west": "room01"
+  }
+} 

@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://c22hjlwatpt08"]
+
+[ext_resource type="Script" uid="uid://dpgi4vvylip17" path="res://scripts/Player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/Player3DRenderer.tscn" id="2_renderer"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_v6fml"]
+viewport_path = NodePath("Player3DRenderer")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3li8b"]
+size = Vector2(19.1721, 13.5248)
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+position = Vector2(640, 360)
+script = ExtResource("1_player")
+
+[node name="PlayerRect" type="Sprite2D" parent="."]
+position = Vector2(0, 22)
+texture = SubResource("ViewportTexture_v6fml")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.499939, 14)
+rotation = 3.14159
+scale = Vector2(1.09534, 1.3309)
+shape = SubResource("RectangleShape2D_3li8b")
+
+[node name="TearsSpawnPoint" type="Node2D" parent="."]
+
+[node name="Player3DRenderer" parent="." instance=ExtResource("2_renderer")]
+transparent_bg = true

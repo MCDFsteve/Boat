@@ -1,0 +1,51 @@
+[gd_scene load_steps=5 format=3 uid="uid://dc5kgvnxl5ykk"]
+
+[ext_resource type="PackedScene" uid="uid://c22hjlwatpt08" path="res://scenes/Player.tscn" id="1_player"]
+[ext_resource type="Script" uid="uid://cf38n5buuuua6" path="res://scripts/UI.gd" id="2_ui"]
+[ext_resource type="Script" uid="uid://cbk4040cxnjp5" path="res://scripts/CameraController.gd" id="3_camera"]
+[ext_resource type="Script" uid="uid://1byhfthx5ngt" path="res://scripts/RoomManager.gd" id="4_room_manager"]
+
+[node name="Main" type="Node2D"]
+
+[node name="RoomManager" type="Node2D" parent="."]
+script = ExtResource("4_room_manager")
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("2_ui")
+
+[node name="UIControl" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HealthLabel" type="Label" parent="UI/UIControl"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 46.0
+text = "Health: 100"
+
+[node name="RoomLabel" type="Label" parent="UI/UIControl"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 200.0
+offset_bottom = 76.0
+text = "Room: room01"
+
+[node name="SeedLabel" type="Label" parent="UI/UIControl"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 80.0
+offset_right = 300.0
+offset_bottom = 106.0
+text = "Seed: 123456789"

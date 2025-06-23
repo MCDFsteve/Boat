@@ -1,0 +1,20 @@
+{
+  "id": "room01",
+  "name": "起始房间",
+  "background_image": "res://assets/background/room01.png",
+  "collision_mask": "res://assets/background/room01_block.png",
+  "type": "starting_room",
+  "presets": [
+    {
+      "name": "empty_preset",
+      "enemies": [],
+      "items": []
+    }
+  ],
+  "exits": {
+    "north": null,
+    "south": null,
+    "east": "room02",
+    "west": null
+  }
+} 
